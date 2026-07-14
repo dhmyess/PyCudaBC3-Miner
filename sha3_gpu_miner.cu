@@ -94,7 +94,7 @@ __device__ __forceinline__ void sha3_256_single(const uint8_t *in, int inlen, ui
 }
 
 // Kernel: each thread hashes one nonce
-extern "C" __global__ __launch_bounds__(256) void scan_kernel(
+extern "C" __global__ __launch_bounds__(512) void scan_kernel(
     const uint8_t* __restrict__ header76,
     uint32_t start_nonce,
     const uint8_t* __restrict__ target32,
@@ -163,7 +163,7 @@ extern "C" int scan_batch(
     unsigned int *d_found_count = nullptr;
     unsigned int h_found_count = 0;
 
-    const int threadsPerBlock = 256;
+    const int threadsPerBlock = 512;
     const int blocksPerGrid = 32768;  // 256 * 32768 = 8,388,608 nonces per batch
 
     CUDA_CHECK(cudaMalloc(&d_header76, 76));
