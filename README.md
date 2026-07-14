@@ -5,4 +5,8 @@ Before using this script, compile it first.
 
 bash build.sh
 
-sorry hashrate calculation is still not accurate
+edit config bc3-miner.py
+
+run script and mine
+
+python bc3-miner.py
