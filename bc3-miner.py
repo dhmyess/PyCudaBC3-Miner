@@ -16,7 +16,7 @@ config = {
 	"user_name": "bc1qkjwksjfnm0vhuf0pxz72mjta6rm5v3eqj4w3rw.dharma",
 	"password": "x",
 	"min_diff": 1,
-	"batch_number": 50,
+	"batch_number": 256,
 	"poll_sleep": 0.05,
 	"reconnect_backoff": 5.0,
 }
