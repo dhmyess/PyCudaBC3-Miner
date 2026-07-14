@@ -16,17 +16,17 @@ config = {
 	"user_name": "bc1qkjwksjfnm0vhuf0pxz72mjta6rm5v3eqj4w3rw.dharma",
 	"password": "x",
 	"min_diff": 1,
-	"batch_number": 200,
+	"batch_number": 50,
 	"poll_sleep": 0.05,
 	"reconnect_backoff": 5.0,
 }
 
 LIB_PATH = os.path.join(os.path.dirname(os.path.abspath(__file__)), "libsha3miner.so")
 
-THREADS_PER_BLOCK = 256
+THREADS_PER_BLOCK = 512
 BLOCKS_PER_GRID = 32768
-BATCH_SIZE = THREADS_PER_BLOCK * BLOCKS_PER_GRID  # 8388608
-TOTAL_BATCHES = (0xFFFFFFFF + 1) // BATCH_SIZE     # 512
+BATCH_SIZE = THREADS_PER_BLOCK * BLOCKS_PER_GRID  # 16777216
+TOTAL_BATCHES = (0xFFFFFFFF + 1) // BATCH_SIZE     # max 256 batch
 MAX_FOUND_PER_BATCH = 1024
 
 # -------------------------------
