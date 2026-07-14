@@ -174,6 +174,13 @@ def double_sha256_hex(hexdata):
 	b = bytes.fromhex(hexdata)
 	return hashlib.sha256(hashlib.sha256(b).digest()).hexdigest()
 
+def block_target(bits):
+	exponent = int(bits[0:2],16)
+	coefficient = int(bits[2:8],16)
+	target = coefficient * 2**(8 * (exponent - 3))
+	diff = 0x00000000ffff0000000000000000000000000000000000000000000000000000 / target
+	return diff
+
 def build_block_header_from_job(job, extranonce1, extranonce2):
 	job_id = job[0]
 	prevhash = rev_8B(job[1])
@@ -189,21 +196,9 @@ def build_block_header_from_job(job, extranonce1, extranonce2):
 	for m in merkle_branch:
 		root = double_sha256_hex(root + m)
 	header = version + prevhash + root + ntime + nbits
-	return job_id, header, ttime    # return ntime asli
+	target_block = block_target(job[6])
+	return job_id, header, ttime, target_block
 
-def en2_size(size):
-	bit8 = "ff"
-	en2size = ""
-	for i in range(size):
-		en2size = en2size + bit8
-	return int(en2size,16)
-
-def block_target(bits):
-	exponent = int(bits[0:2],16)
-	coefficient = int(bits[2:8],16)
-	target = coefficient * 2**(8 * (exponent - 3))
-	diff = 0x00000000ffff0000000000000000000000000000000000000000000000000000 / target
-	return diff
 
 def load_lib():
 	if not os.path.exists(LIB_PATH):
@@ -305,7 +300,7 @@ def mine_loop():
 					continue
 
 				extranonce2 = random.randbytes(client.extranonce2_size).hex()
-				job_id, header_hex, ntime_hex = build_block_header_from_job(
+				job_id, header_hex, ntime_hex, target_block = build_block_header_from_job(
 					current_job, client.extranonce1, extranonce2
 				)
 
@@ -358,7 +353,29 @@ def mine_loop():
 						result_hash = sha256t(header_hex + rev_hex(f"{nonce:08x}"))
 						blockhash = rev_hex(result_hash)
 						difficulty = 0x00000000ffff0000000000000000000000000000000000000000000000000000 / int(blockhash, 16)
-						if difficulty >= target_miner:
+						if difficulty >= target_block:
+							now = datetime.now()
+							current_time_string = now.strftime("%H:%M:%S")
+							
+							print(f"  [🎉🥳👏] {current_time_string} Block Found! ( 💕 ŐωŐ 💕 )")
+							print(f"       Job ID: {current_job[0]}")
+							print(f"       EN2   : {extranonce2}")
+							print(f"       Ntime : {current_job[7]}")
+							print(f"       Nonce : {nonce:08x}")
+							print(f"       Hash  : {blockhash}")
+							print(f"       Diff  : {difficulty:.2f}")
+							submit_id += 1
+							params = [
+								config["user_name"],
+								current_job[0],
+								extranonce2,
+								ntime_hex,
+								f"{nonce:08x}"
+							]
+							client.send("mining.submit", params, _id=submit_id)
+							response = client.recv_blocking_line()
+							print(f"{response}")
+						elif difficulty >= target_miner:
 							now = datetime.now()
 							current_time_string = now.strftime("%H:%M:%S")
 							
